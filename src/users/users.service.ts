@@ -46,11 +46,11 @@ export class UsersService {
   }
 
   private handleDBErrors(error: any): never {
-    this.logger.error(error);
     if (error.code === '23505') {
       throw new BadRequestException(error.detail);
     }
-
+    
+    this.logger.error(error);
     throw new InternalServerErrorException('Please check server logs');
   }
 }
