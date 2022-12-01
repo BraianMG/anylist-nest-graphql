@@ -1,12 +1,25 @@
-import { Injectable } from '@nestjs/common';
-import { CreateUserInput } from './dto/create-user.input';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
+import { SignupInput } from '../auth/dto/inputs/signup.input';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UsersService {
-  create(createUserInput: CreateUserInput) {
-    return 'This action adds a new user';
+  constructor(
+    @InjectRepository(User)
+    private readonly usersRepository: Repository<User>,
+  ) {}
+
+  async create(signupInput: SignupInput): Promise<User> {
+    try {
+      const newUser = this.usersRepository.create(signupInput);
+      return await this.usersRepository.save(newUser);
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException('Algo saliò mal');
+    }
   }
 
   async findAll(): Promise<User[]> {
@@ -14,7 +27,7 @@ export class UsersService {
   }
 
   async findOne(id: string): Promise<User> {
-    throw new Error("findOne method not implemented");    
+    throw new Error('findOne method not implemented');
   }
 
   update(id: number, updateUserInput: UpdateUserInput) {
@@ -22,6 +35,6 @@ export class UsersService {
   }
 
   async block(id: string): Promise<User> {
-    throw new Error("block method not implemented"); 
+    throw new Error('block method not implemented');
   }
 }
