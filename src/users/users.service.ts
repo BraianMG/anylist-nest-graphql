@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { UpdateUserInput } from './dto/update-user.input';
 import { User } from './entities/user.entity';
@@ -40,9 +41,9 @@ export class UsersService {
 
   async findOneByEmail(email: string): Promise<User> {
     try {
-      return this.usersRepository.findOneByOrFail({ email });
+      return await this.usersRepository.findOneByOrFail({ email });
     } catch (error) {
-      this.handleDBErrors(error);
+      throw new NotFoundException(`${email} not found`);
     }
   }
 
