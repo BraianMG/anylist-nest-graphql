@@ -4,6 +4,8 @@ import { LoginInput, SignupInput } from './dto/inputs';
 import { AuthResponse } from './types/auth-response.type';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { User } from '../users/entities/user.entity';
+import { UnauthorizedException } from '@nestjs/common/exceptions/unauthorized.exception';
 
 @Injectable()
 export class AuthService {
@@ -34,5 +36,16 @@ export class AuthService {
 
   private getJwtToken(userId: string) {
     return this.jwtService.sign({ id: userId });
+  }
+
+  async validateUser(id: string): Promise<User> {
+    const user = await this.userService.findOneById(id);
+
+    if (!user.isActive)
+      throw new UnauthorizedException('User is inactive, talk with an admin');
+
+    delete user.password;
+
+    return user;
   }
 }
