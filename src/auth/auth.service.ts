@@ -3,16 +3,19 @@ import { UsersService } from '../users/users.service';
 import { LoginInput, SignupInput } from './dto/inputs';
 import { AuthResponse } from './types/auth-response.type';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private readonly userService: UsersService) {}
+  constructor(
+    private readonly userService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
 
   async signup(signupInput: SignupInput): Promise<AuthResponse> {
     const user = await this.userService.create(signupInput);
 
-    // TODO: crear JWT
-    const token = 'abc123';
+    const token = this.getJwtToken(user.id);
 
     return { token, user };
   }
@@ -24,9 +27,12 @@ export class AuthService {
     if (!bcrypt.compareSync(password, user.password))
       throw new BadRequestException('Email or Password do not match');
 
-    // TODO: JWT
-    const token = 'abc123';
+    const token = this.getJwtToken(user.id);
 
     return { user, token };
+  }
+
+  private getJwtToken(userId: string) {
+    return this.jwtService.sign({ id: userId });
   }
 }
