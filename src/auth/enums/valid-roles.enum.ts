@@ -1,3 +1,4 @@
+// TODO: Implementar enum como GraphQL Enum Type
 export enum ValidRoles {
   ADMIN = 'admin',
   USER = 'user',

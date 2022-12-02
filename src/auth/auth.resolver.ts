@@ -8,7 +8,7 @@ import { ValidRoles } from './enums/valid-roles.enum';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthResponse } from './types/auth-response.type';
 
-@Resolver()
+@Resolver(() => AuthResolver)
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
   @Mutation(() => AuthResponse, { name: 'signup' })
