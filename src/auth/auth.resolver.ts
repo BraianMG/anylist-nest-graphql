@@ -4,6 +4,7 @@ import { User } from '../users/entities/user.entity';
 import { AuthService } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { LoginInput, SignupInput } from './dto/inputs';
+import { ValidRoles } from './enums/valid-roles.enum';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { AuthResponse } from './types/auth-response.type';
 
@@ -26,7 +27,9 @@ export class AuthResolver {
 
   @Query(() => AuthResponse, { name: 'revalidate' })
   @UseGuards(JwtAuthGuard)
-  revalidateToken(@CurrentUser() user: User): AuthResponse {
-    return this.authService.revalidateToken(user)
+  revalidateToken(
+    @CurrentUser(/** [ValidRoles.ADMIN] */) user: User,
+  ): AuthResponse {
+    return this.authService.revalidateToken(user);
   }
 }
