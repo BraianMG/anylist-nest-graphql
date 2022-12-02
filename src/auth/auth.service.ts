@@ -48,4 +48,9 @@ export class AuthService {
 
     return user;
   }
+
+  revalidateToken(user: User): AuthResponse {
+    const token = this.getJwtToken(user.id);
+    return { token, user };
+  }
 }
