@@ -25,9 +25,16 @@ type AuthResponse {
 type Query {
   items: [Item!]!
   item(id: ID!): Item!
-  users(roles: [String!] = []): [User!]!
+  users(roles: [ValidRoles!] = []): [User!]!
   user(id: ID!): User!
   revalidate: AuthResponse!
+}
+
+"""Nisi anim pariatur elit cillum amet voluptate in veniam."""
+enum ValidRoles {
+  ADMIN
+  USER
+  SUPER_USER
 }
 
 type Mutation {
