@@ -15,7 +15,7 @@ export class UsersResolver {
   @Query(() => [User], { name: 'users' })
   async findAll(
     @Args() validRoles: ValidRolesArgs,
-    @CurrentUser([ValidRoles.ADMIN, ValidRoles.SUPER_USER]) user: User,
+    @CurrentUser([ValidRoles.ADMIN]) user: User,
   ): Promise<User[]> {
     return this.usersService.findAll(validRoles.roles);
   }
@@ -23,7 +23,7 @@ export class UsersResolver {
   @Query(() => User, { name: 'user' })
   async findOne(
     @Args('id', { type: () => ID }, ParseUUIDPipe) id: string,
-    @CurrentUser([ValidRoles.ADMIN, ValidRoles.SUPER_USER]) user: User,
+    @CurrentUser([ValidRoles.ADMIN]) user: User,
   ): Promise<User> {
     return this.usersService.findOneById(id);
   }
@@ -36,8 +36,8 @@ export class UsersResolver {
   @Mutation(() => User, { name: 'blockUser' })
   async blockUser(
     @Args('id', { type: () => ID }, ParseUUIDPipe) id: string,
-    @CurrentUser([ValidRoles.ADMIN, ValidRoles.SUPER_USER]) user: User,
+    @CurrentUser([ValidRoles.ADMIN]) user: User,
   ): Promise<User> {
-    return this.usersService.block(id);
+    return this.usersService.block(id, user);
   }
 }
