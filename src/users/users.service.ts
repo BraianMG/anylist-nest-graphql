@@ -12,6 +12,7 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { ValidRoles } from '../auth/enums/valid-roles.enum';
+import { PaginationArgs, SearchArgs } from '../common/dto/args';
 
 @Injectable()
 export class UsersService {
@@ -36,20 +37,49 @@ export class UsersService {
     }
   }
 
-  async findAll(roles: ValidRoles[]): Promise<User[]> {
-    if (roles.length === 0)
-      return this.usersRepository.find({
-        //! No es necesario porque tenemos 'lazy' la propiedad 'lastUpdateBy'
-        // relations: {
-        //   lastUpdateBy: true,
-        // },
-      });
+  async findAll(
+    roles: ValidRoles[],
+    paginationArgs: PaginationArgs,
+    searchArgs: SearchArgs,
+  ): Promise<User[]> {
+    const { limit, offset } = paginationArgs;
+    const { search } = searchArgs;
+    console.log({ zone: 'UsersService - findAll', limit, offset, search });
 
-    return this.usersRepository
+    const queryBuilder = this.usersRepository
       .createQueryBuilder()
-      .andWhere('ARRAY[roles] && ARRAY[:...roles]')
-      .setParameter('roles', roles)
-      .getMany();
+      .take(limit)
+      .skip(offset);
+
+    if (roles.length !== 0)
+      queryBuilder
+        .andWhere('ARRAY[roles] && ARRAY[:...roles]')
+        .setParameter('roles', roles);
+
+    if (search) {
+      // TODO: agregar búsqueda por 'email' además de 'fullName'
+      queryBuilder.andWhere('LOWER("fullName") like :fullName', {
+        fullName: `%${search.toLowerCase()}%`,
+      });
+    }
+
+    return queryBuilder.getMany();
+
+    //# region ORIGINAL
+    // if (roles.length === 0)
+    //   return this.usersRepository.find({
+    //     //! No es necesario porque tenemos 'lazy' la propiedad 'lastUpdateBy'
+    //     // relations: {
+    //     //   lastUpdateBy: true,
+    //     // },
+    //   });
+
+    // return this.usersRepository
+    //   .createQueryBuilder()
+    //   .andWhere('ARRAY[roles] && ARRAY[:...roles]')
+    //   .setParameter('roles', roles)
+    //   .getMany();
+    //# endregion
   }
 
   async findOneByEmail(email: string): Promise<User> {
