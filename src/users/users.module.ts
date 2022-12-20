@@ -9,7 +9,7 @@ import { ItemsModule } from '../items/items.module';
   providers: [UsersResolver, UsersService],
   imports: [TypeOrmModule.forFeature([User]), ItemsModule],
   exports: [
-    // TypeOrmModule, //! Solo si es necesario (si se quiere usar el UsersEntity o inyectar el UserRepository)
+    TypeOrmModule, //! Solo si es necesario (si se quiere usar el UsersEntity o inyectar el UserRepository)
     UsersService,
   ],
 })
