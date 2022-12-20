@@ -4,7 +4,7 @@ import { User } from '../users/entities/user.entity';
 import { Repository } from 'typeorm';
 import { CreateItemInput, UpdateItemInput } from './dto/inputs';
 import { Item } from './entities/item.entity';
-import { PaginationArgs } from '../common/dto/args/pagination.args';
+import { PaginationArgs, SearchArgs } from '../common/dto/args';
 
 @Injectable()
 export class ItemsService {

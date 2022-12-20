@@ -8,7 +8,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
-      forbidNonWhitelisted: true,
+      // forbidNonWhitelisted: true, //! Esto es para evitar el poder enviar más información de la que necesito, en este caso GrapQL se encarga de evitar eso. Desactivamos o comentamos para poder recibir más de un Args como en 'findAll' de ItemsResolver
     }),
   );
 
