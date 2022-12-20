@@ -25,11 +25,26 @@ export class ItemsService {
     const { limit, offset } = paginationArgs;
     const { search } = searchArgs;
 
-    return this.itemsRepository.find({
-      where: { user: { id: user.id }, name: Like(`%${search}%`) },
-      take: limit,
-      skip: offset,
-    });
+    //! Opción sencilla pero limitada en cuanto a case sensitive
+    // return this.itemsRepository.find({
+    //   where: { user: { id: user.id }, name: Like(`%${search}%`) },
+    //   take: limit,
+    //   skip: offset,
+    // });
+
+    const queryBuilder = this.itemsRepository
+      .createQueryBuilder()
+      .take(limit)
+      .skip(offset)
+      .where('"userId" = :userId', { userId: user.id });
+
+    if (search) {
+      queryBuilder.andWhere('LOWER(name) like :name', {
+        name: `%${search.toLowerCase()}%`,
+      });
+    }
+
+    return queryBuilder.getMany();
   }
 
   async findOne(id: string, user: User): Promise<Item> {
