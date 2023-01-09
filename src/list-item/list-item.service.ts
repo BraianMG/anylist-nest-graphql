@@ -4,6 +4,8 @@ import { UpdateListItemInput } from './dto/update-list-item.input';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ListItem } from './entities/list-item.entity';
 import { Repository } from 'typeorm';
+import { List } from '../lists/entities/list.entity';
+import { PaginationArgs, SearchArgs } from '../common/dto/args';
 
 @Injectable()
 export class ListItemService {
@@ -24,8 +26,33 @@ export class ListItemService {
     return this.listItemsRepository.save(newListItem);
   }
 
-  async findAll(): Promise<ListItem[]> {
-    return this.listItemsRepository.find();
+  async findAll(
+    list: List,
+    paginationArgs: PaginationArgs,
+    searchArgs: SearchArgs,
+  ): Promise<ListItem[]> {
+    const { limit, offset } = paginationArgs;
+    const { search } = searchArgs;
+
+    const queryBuilder = this.listItemsRepository
+      .createQueryBuilder('listItem')
+      .innerJoin('listItem.item', 'item')
+      .take(limit)
+      .skip(offset)
+      .where('"listId" = :listId', { listId: list.id });
+
+    // BUG: corregir busqueda por nombre de item
+    if (search) {
+      queryBuilder.andWhere('LOWER(item.name) like :name', {
+        name: `%${search.toLowerCase()}%`,
+      });
+    }
+
+    return queryBuilder.getMany();
+  }
+
+  async countListItemsByList(list: List): Promise<number> {
+    return this.listItemsRepository.count({ where: { list: { id: list.id } } });
   }
 
   findOne(id: number) {
