@@ -4,11 +4,13 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Item } from '../items/entities/item.entity';
 import { Repository } from 'typeorm';
 import { User } from '../users/entities/user.entity';
-import { SEED_ITEMS, SEED_USERS } from './data/seed-data';
+import { SEED_ITEMS, SEED_LISTS, SEED_USERS } from './data/seed-data';
 import { UsersService } from '../users/users.service';
 import { ItemsService } from '../items/items.service';
 import { ListItem } from '../list-item/entities/list-item.entity';
 import { List } from '../lists/entities/list.entity';
+import { ListsService } from '../lists/lists.service';
+import { ListItemService } from '../list-item/list-item.service';
 
 @Injectable()
 export class SeedService {
@@ -26,6 +28,8 @@ export class SeedService {
     private readonly listRepository: Repository<List>,
     private readonly usersService: UsersService,
     private readonly itemsService: ItemsService,
+    private readonly listsService: ListsService,
+    private readonly listItemService: ListItemService,
   ) {
     this.isProd = configService.get('STATE') === 'prod';
   }
@@ -43,8 +47,15 @@ export class SeedService {
     await this.loadItems(user);
 
     // TODO: Crear Listas
+    const list = await this.loadList(user);
 
     // TODO: Crear ListItems
+    const items = await this.itemsService.findAll(
+      user,
+      { limit: 15, offset: 0 },
+      {},
+    );
+    await this.loadListItems(list, items);
 
     return true;
   }
@@ -58,11 +69,7 @@ export class SeedService {
       .execute();
 
     // Borrar Lists
-    await this.listRepository
-      .createQueryBuilder()
-      .delete()
-      .where({})
-      .execute();
+    await this.listRepository.createQueryBuilder().delete().where({}).execute();
 
     // Borrar Items
     await this.itemsRepository
@@ -97,5 +104,26 @@ export class SeedService {
     }
 
     await Promise.all(itemPromises);
+  }
+
+  async loadList(user: User): Promise<List> {
+    const lists = [];
+
+    for (const list of SEED_LISTS) {
+      lists.push(await this.listsService.create(list, user));
+    }
+
+    return lists[0];
+  }
+
+  async loadListItems(list: List, items: Item[]) {
+    for (const item of items) {
+      this.listItemService.create({
+        quantity: Math.round(Math.random() * 10),
+        completed: !!Math.round(Math.random() * 1),
+        listId: list.id,
+        itemId: item.id,
+      });
+    }
   }
 }
