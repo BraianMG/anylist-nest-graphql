@@ -9,7 +9,7 @@
 ```
 yarn install
 ```
-4. Levantar la imagen (Docker desktop)
+4. Levantar la imagen de DB (Docker desktop)
 ```
 docker-compose up -d
 ```
